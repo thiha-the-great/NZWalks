@@ -51,19 +51,6 @@ namespace NZWalks.API.Controllers
             return CreatedAtAction(nameof(GetRegionAsync), new { id = regionDto.Id }, regionDto);
         }
 
-        [HttpDelete]
-        [Route("{id:guid}")]
-        public async Task<IActionResult> DeleteRegionAsync(Guid id)
-        {
-            var region = await _regionRepository.DeleteAsync(id);
-
-            if (region == null) return NotFound();
-
-            var regionDto = _mapper.Map<Models.Dto.Region>(region);
-
-            return Ok(regionDto);
-        }
-
         [HttpPut]
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateRegionAsync([FromRoute]Guid id, [FromBody]Models.Dto.UpdateRegionRequest updateRegionRequest)
@@ -72,6 +59,19 @@ namespace NZWalks.API.Controllers
             var region = _mapper.Map<Models.Domain.Region>(updateRegionRequest);
 
             region = await _regionRepository.UpdateAsync(id, region);
+
+            if (region == null) return NotFound();
+
+            var regionDto = _mapper.Map<Models.Dto.Region>(region);
+
+            return Ok(regionDto);
+        }
+
+        [HttpDelete]
+        [Route("{id:guid}")]
+        public async Task<IActionResult> DeleteRegionAsync(Guid id)
+        {
+            var region = await _regionRepository.DeleteAsync(id);
 
             if (region == null) return NotFound();
 

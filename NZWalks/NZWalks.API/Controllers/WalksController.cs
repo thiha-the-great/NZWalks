@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Repositories;
+using NZWalks.API.Validations;
 
 namespace NZWalks.API.Controllers
 {
@@ -9,11 +10,15 @@ namespace NZWalks.API.Controllers
     public class WalksController : ControllerBase
     {
         private readonly IWalkRepository _walkRepository;
+        private readonly IRegionRepository _regionRepository;
+        private readonly IWalkDifficultyRepository _walkDifficultyRepository;
         private readonly IMapper _mapper;
 
-        public WalksController(IWalkRepository walkRepository, IMapper mapper)
+        public WalksController(IWalkRepository walkRepository, IRegionRepository regionRepository, IWalkDifficultyRepository walkDifficultyRepository, IMapper mapper)
         {
             _walkRepository = walkRepository;
+            _regionRepository = regionRepository;
+            _walkDifficultyRepository = walkDifficultyRepository;
             _mapper = mapper;
         }
 
@@ -42,6 +47,8 @@ namespace NZWalks.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddWalkAsync(Models.Dto.AddWalkRequest addWalkRequest)
         {
+            if (!WalkManager.ValidateAddWalkAsync(addWalkRequest, _regionRepository, _walkDifficultyRepository, ModelState)) return BadRequest(ModelState);
+
             var walk = _mapper.Map<Models.Domain.Walk>(addWalkRequest);
 
             walk = await _walkRepository.AddAsync(walk);
@@ -55,6 +62,7 @@ namespace NZWalks.API.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateWalkAsync([FromRoute] Guid id, [FromBody] Models.Dto.UpdateWalkRequest updateWalkRequest)
         {
+            if (!WalkManager.ValidateUpdateWalkAsync(updateWalkRequest, _regionRepository, _walkDifficultyRepository, ModelState)) return BadRequest(ModelState);
 
             var walk = _mapper.Map<Models.Domain.Walk>(updateWalkRequest);
 
